@@ -1,0 +1,39 @@
+# HTTP Server
+[server]
+	Address     = ":8199"
+	ServerRoot  = "public"
+	ServerAgent = "gf-admin"
+	LogPath     = "./log/gf-admin/server"
+
+# Logger.
+[logger]
+    Path        = "./log/gf-admin"
+    Level       = "all"
+    Stdout      = true
+
+# Template.
+[viewer]
+    Path        = "template"
+    DefaultFile = "index.html"
+    Delimiters  =  ["${", "}"]
+
+[database]
+    [database.default]
+        link  = "mysql:root:12345678@tcp(127.0.0.1:3306)/vegms"
+        debug = true
+    [database.localhost]
+        link  = "mysql:root:12345678@tcp(127.0.0.1:3306)/vegms"
+    [database.logger]
+        Path   = "./log/sql"
+        Level  = "all"
+        Stdout = true
+
+[redis]
+    default = "10.130.130.219:6379,0"
+[test]
+    env  = "dev"
+
+# HTTP basic authentication passport/password for swagger api page.
+[swagger]
+    user = "123"
+    pass = "123"
