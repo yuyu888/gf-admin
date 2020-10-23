@@ -9,6 +9,7 @@ import (
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/frame/gmvc"
+	"github.com/gogf/gf/os/gtime"
 )
 
 type Controller struct {
@@ -72,6 +73,8 @@ func (c *Controller) Test() {
 	db := g.DB().Table("sys_future_job").Where("status", 1).Where("exec_time <=?", time.Now().Unix()).Limit(100)
 	list, _ := db.All()
 	fmt.Println(list)
+	ct := gtime.Now().Format("Y-m-d H:i:s")
+	fmt.Println(ct)
 
 	c.Response.WriteExit("this is a test!!!")
 }

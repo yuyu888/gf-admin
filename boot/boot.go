@@ -20,9 +20,9 @@ func init() {
 
 	fmt.Println(*Env)
 	fmt.Println(runMode)
-	crontab.Register()
+	// crontab.Register()
 	if runMode == "prod" {
-		//crontab.Register() //生产环境下才运行定时任务
+		crontab.Register() //生产环境下才运行定时任务
 		g.SetDebug(false)
 	}
 
