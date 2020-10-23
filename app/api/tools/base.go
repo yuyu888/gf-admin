@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
+	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/frame/gmvc"
 )
 
@@ -67,5 +69,9 @@ func GetLocalIp() (string, error) {
 }
 
 func (c *Controller) Test() {
-	c.Response.WriteExit("this is a test")
+	db := g.DB().Table("sys_future_job").Where("status", 1).Where("exec_time <=?", time.Now().Unix()).Limit(100)
+	list, _ := db.All()
+	fmt.Println(list)
+
+	c.Response.WriteExit("this is a test!!!")
 }

@@ -3,8 +3,7 @@ package boot
 import (
 	"flag"
 	"fmt"
-
-	_ "github.com/gogf/gf-demos/packed"
+	"gf-admin/crontab"
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/genv"
@@ -21,6 +20,7 @@ func init() {
 
 	fmt.Println(*Env)
 	fmt.Println(runMode)
+	crontab.Register()
 	if runMode == "prod" {
 		//crontab.Register() //生产环境下才运行定时任务
 		g.SetDebug(false)
