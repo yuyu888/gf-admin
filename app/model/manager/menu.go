@@ -73,6 +73,7 @@ func (menu *MenuModel) Delete(menu_id int) bool {
 	fmt.Println(r)
 
 	if err == nil {
+		g.DB().Table("admin_role_menu_relation").Delete("menu_id", menu_id)
 		return true
 	} else {
 		return false

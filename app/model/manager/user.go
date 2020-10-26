@@ -74,6 +74,7 @@ func (user *UserModel) Edit(uid int, mobile string, email string, avatar string,
 func (user *UserModel) Delete(uid int) bool {
 	_, err := g.DB().Table("admin_user").Data(g.Map{"status": 2}).Where("id", uid).Update()
 	if err == nil {
+		g.DB().Table("admin_user_role_relation").Delete("uid", uid)
 		return true
 	} else {
 		return false

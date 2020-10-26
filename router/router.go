@@ -12,5 +12,6 @@ func init() {
 	s.BindController("/api/tools", new(tools.Controller), "Test, Localip")
 	s.BindController("/api/manager/menu", new(manager.MenuController), "List, Add, Edit, Delete, FullList")
 	s.BindController("/api/manager/user", new(manager.UserController), "List, Add, Edit, Delete, FullList")
+	s.BindController("/api/manager/role", new(manager.RoleController), "Add, Edit, Delete")
 
 }
