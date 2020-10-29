@@ -11,7 +11,8 @@ func init() {
 	s := g.Server()
 	s.BindController("/api/tools", new(tools.Controller), "Test, Localip")
 	s.BindController("/api/manager/menu", new(manager.MenuController), "List, Add, Edit, Delete, FullList")
-	s.BindController("/api/manager/user", new(manager.UserController), "List, Add, Edit, Delete, FullList")
+	s.BindController("/api/manager/user", new(manager.UserController), "List, Add, Edit, Delete, FullList, Login, Loginout")
 	s.BindController("/api/manager/role", new(manager.RoleController), "Add, Edit, Delete")
+	s.BindController("/api/manager/common", new(manager.CommonController), "Auth")
 
 }

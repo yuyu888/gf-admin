@@ -3,6 +3,8 @@ package manager
 import (
 	"fmt"
 
+	"github.com/gogf/gf/database/gdb"
+
 	"github.com/gogf/gf/crypto/gmd5"
 	"github.com/gogf/gf/frame/g"
 )
@@ -79,4 +81,16 @@ func (user *UserModel) Delete(uid int) bool {
 	} else {
 		return false
 	}
+}
+
+func (user *UserModel) CheckUserByMp(mobile string, password string) (gdb.Record, error) {
+	condition := g.Map{"mobile": mobile, "password": password}
+	r, err := g.DB().Table("admin_user").Where(condition).One()
+	return r, err
+}
+
+func (user *UserModel) GetUserByUid(uid string) (gdb.Record, error) {
+	condition := g.Map{"id": uid}
+	r, err := g.DB().Table("admin_user").Where(condition).One()
+	return r, err
 }

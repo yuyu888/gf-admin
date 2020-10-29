@@ -3,6 +3,7 @@ package manager
 import (
 	"gf-admin/app/api"
 	"gf-admin/app/model/manager"
+	"gf-admin/app/service/sso"
 )
 
 type UserController struct {
@@ -10,7 +11,10 @@ type UserController struct {
 }
 
 func (c *UserController) List() {
-	c.Display(4001, "something is wrong!", nil)
+	c.CheckLogin()
+	// c.CheckLoginHigh()
+
+	c.Display(4001, "something is wrong!!!!!!", nil)
 	c.Resp.Status = 200
 	c.Resp.Message = "success"
 	c.Response.Write(c.Resp)
@@ -76,4 +80,23 @@ func (c *UserController) Delete() {
 		c.Display(5001, "删除失败", nil)
 	}
 	c.Display(200, "删除成功", nil)
+}
+
+func (c *UserController) Login() {
+	mobile := c.Request.GetFormString("mobile", "")
+	password := c.Request.GetFormString("password", "")
+	if len(mobile) == 0 || len(password) == 0 {
+		c.Display(4001, "参数错误！", nil)
+	}
+	res, errstr := new(sso.SsoService).Login(mobile, password, c.Response)
+	if res == true {
+		c.Display(200, "成功登陆", nil)
+	} else {
+		c.Display(5001, errstr, nil)
+	}
+}
+
+func (c *UserController) Loginout() {
+	new(sso.SsoService).Loginout(c.Request)
+	c.Display(200, "成功退出", nil)
 }

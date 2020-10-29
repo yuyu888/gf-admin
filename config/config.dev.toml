@@ -37,3 +37,5 @@
 [swagger]
     user = "123"
     pass = "123"
+[secretkey]
+    sso  = "c10157daa5b67bcd5bead831ba554e0c"
