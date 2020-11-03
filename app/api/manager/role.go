@@ -2,7 +2,7 @@ package manager
 
 import (
 	"gf-admin/app/api"
-	"gf-admin/app/model/manager"
+	"gf-admin/app/service/manager"
 )
 
 type RoleController struct {
@@ -10,12 +10,12 @@ type RoleController struct {
 }
 
 func (c *RoleController) List() {
-	c.Display(4001, "something is wrong!", nil)
-	c.Resp.Status = 200
-	c.Resp.Message = "success"
-	c.Response.Write(c.Resp)
-
-	// c.Response.WriteExit("this is a test!!!")
+	data, err := new(manager.RoleService).List()
+	if err != nil {
+		c.Display(5001, "系统错误", nil)
+	} else {
+		c.Display(200, "success", data)
+	}
 }
 
 func (c *RoleController) Add() {
@@ -25,7 +25,7 @@ func (c *RoleController) Add() {
 		c.Display(4001, "参数错误！", nil)
 	}
 
-	res, id := new(manager.RoleModel).Add(role_name)
+	res, id := new(manager.RoleService).Add(role_name)
 	if res == true {
 		c.Resp.Status = 200
 		c.Resp.Message = "success"
@@ -45,7 +45,7 @@ func (c *RoleController) Edit() {
 		c.Display(4001, "参数错误！", nil)
 	}
 
-	res := new(manager.RoleModel).Edit(roleid, role_name)
+	res := new(manager.RoleService).Edit(roleid, role_name)
 	if res == true {
 		c.Resp.Status = 200
 		c.Resp.Message = "success"
@@ -61,62 +61,90 @@ func (c *RoleController) Delete() {
 	if roleid == 0 {
 		c.Display(4001, "参数错误！", nil)
 	}
-	res := new(manager.RoleModel).Delete(roleid)
+	res := new(manager.RoleService).Delete(roleid)
 	if res == false {
 		c.Display(5001, "删除失败", nil)
 	}
 	c.Display(200, "删除成功", nil)
 }
 
-func (c *RoleController) AddRoleUser() {
+func (c *RoleController) RoleUserList() {
+	roleid := c.Request.GetFormInt("id", 0)
+	if roleid == 0 {
+		c.Display(4001, "参数错误！", nil)
+	}
+	data, err := new(manager.RoleService).RoleUserList(roleid)
+	if err != nil {
+		c.Display(5001, "系统错误", nil)
+	} else {
+		c.Display(200, "success", data)
+	}
+}
+
+func (c *RoleController) AddRoleMember() {
 	roleid := c.Request.GetFormInt("roleid", 0)
 	uid := c.Request.GetFormInt("uid", 0)
 
 	if roleid == 0 || uid == 0 {
 		c.Display(4001, "参数错误！", nil)
 	}
-	res := new(manager.RelationModel).AddRoleUser(roleid, uid)
+	res := new(manager.RelationService).AddRoleUser(roleid, uid)
 	if res == false {
 		c.Display(5001, "添加失败", nil)
 	}
 	c.Display(200, "添加成功", nil)
 }
+
+func (c *RoleController) MemberList() {
+	roleid := c.Request.GetQueryInt("roleid", 0)
+
+	if roleid == 0 {
+		c.Display(4001, "参数错误！", nil)
+	}
+	data, err := new(manager.RelationService).RoleMemberList(roleid)
+	if err != nil {
+		c.Display(5001, "系统错误", nil)
+	} else {
+		c.Display(200, "success", data)
+	}
+}
+
 func (c *RoleController) AddRoleMenu() {
-	roleid := c.Request.GetFormInt("roleid", 0)
-	menu_id := c.Request.GetFormInt("menu_id", 0)
+	// roleid := c.Request.GetFormInt("roleid", 0)
+	// menu_id := c.Request.GetFormInt("menu_id", 0)
 
-	if roleid == 0 || menu_id == 0 {
-		c.Display(4001, "参数错误！", nil)
-	}
-	res := new(manager.RelationModel).AddRoleMenu(roleid, menu_id)
-	if res == false {
-		c.Display(5001, "添加失败", nil)
-	}
-	c.Display(200, "添加成功", nil)
+	// if roleid == 0 || menu_id == 0 {
+	// 	c.Display(4001, "参数错误！", nil)
+	// }
+	// res := new(manager.RelationModel).AddRoleMenu(roleid, menu_id)
+	// if res == false {
+	// 	c.Display(5001, "添加失败", nil)
+	// }
+	// c.Display(200, "添加成功", nil)
 }
-func (c *RoleController) DeleteRoleUser() {
+func (c *RoleController) DeleteRoleMember() {
 	roleid := c.Request.GetFormInt("roleid", 0)
 	uid := c.Request.GetFormInt("uid", 0)
 
 	if roleid == 0 || uid == 0 {
 		c.Display(4001, "参数错误！", nil)
 	}
-	res := new(manager.RelationModel).DeleteRoleUser(roleid, uid)
+	res := new(manager.RelationService).DeleteRoleUser(roleid, uid)
 	if res == false {
 		c.Display(5001, "删除失败", nil)
 	}
 	c.Display(200, "删除成功", nil)
 }
 func (c *RoleController) DeleteRoleMenu() {
-	roleid := c.Request.GetFormInt("roleid", 0)
-	menu_id := c.Request.GetFormInt("menu_id", 0)
+	// roleid := c.Request.GetFormInt("roleid", 0)
+	// menu_id := c.Request.GetFormInt("menu_id", 0)
 
-	if roleid == 0 || menu_id == 0 {
-		c.Display(4001, "参数错误！", nil)
-	}
-	res := new(manager.RelationModel).DeleteRoleMenu(roleid, menu_id)
-	if res == false {
-		c.Display(5001, "删除失败", nil)
-	}
-	c.Display(200, "删除成功", nil)
+	// if roleid == 0 || menu_id == 0 {
+	// 	c.Display(4001, "参数错误！", nil)
+	// }
+	// res := new(manager.RelationModel).DeleteRoleMenu(roleid, menu_id)
+	// if res == false {
+	// 	c.Display(5001, "删除失败", nil)
+	// }
+	// c.Display(200, "删除成功", nil)
 }

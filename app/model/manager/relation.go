@@ -46,6 +46,19 @@ func (relation *RelationModel) DeleteRoleUser(roleid int, uid int) bool {
 	}
 }
 
+func (relation *RelationModel) DeleteRoleUserAll(uid int) bool {
+	if uid == 0 {
+		return false
+	}
+	condition := g.Map{"uid": uid}
+	_, err := g.DB().Table("admin_user_role_relation").Where(condition).Delete()
+	if err == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (relation *RelationModel) DeleteRoleMenu(roleid int, menu_id int) bool {
 	if roleid == 0 || menu_id == 0 {
 		return false

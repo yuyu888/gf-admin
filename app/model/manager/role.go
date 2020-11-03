@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"github.com/gogf/gf/database/gdb"
 	"github.com/gogf/gf/frame/g"
 )
 
@@ -13,10 +14,10 @@ type Role struct {
 	UpdateTime string `json:"update_time"`
 }
 
-func (user *RoleModel) Add(role_name string) (bool, int64) {
+func (r *RoleModel) Add(role_name string) (bool, int64) {
 	role_info := g.Map{"name": role_name}
-	r, err := g.DB().Table("admin_role").Insert(role_info)
-	id, _ := r.LastInsertId()
+	res, err := g.DB().Table("admin_role").Insert(role_info)
+	id, _ := res.LastInsertId()
 	if err == nil {
 		return true, id
 	} else {
@@ -24,7 +25,7 @@ func (user *RoleModel) Add(role_name string) (bool, int64) {
 	}
 }
 
-func (user *RoleModel) Edit(roleid int, role_name string) bool {
+func (r *RoleModel) Edit(roleid int, role_name string) bool {
 	update_data := g.Map{}
 
 	if len(role_name) > 0 {
@@ -42,7 +43,7 @@ func (user *RoleModel) Edit(roleid int, role_name string) bool {
 	}
 }
 
-func (user *RoleModel) Delete(roleid int) bool {
+func (r *RoleModel) Delete(roleid int) bool {
 	_, err := g.DB().Table("admin_role").Delete("id", roleid)
 	if err == nil {
 		g.DB().Table("admin_user_role_relation").Delete("role_id", roleid)
@@ -51,4 +52,13 @@ func (user *RoleModel) Delete(roleid int) bool {
 	} else {
 		return false
 	}
+}
+
+func (r *RoleModel) List() (gdb.Result, error) {
+	return g.DB().Table("admin_role").All()
+}
+
+func (r *RoleModel) UserRoleList(uid int) (gdb.Result, error) {
+	res, err := g.DB().Table("admin_role r").LeftJoin("admin_user_role_relation ur", "r.id=ur.role_id").Fields("r.*").Where("ur.uid", uid).All()
+	return res, err
 }

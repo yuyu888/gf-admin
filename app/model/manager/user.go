@@ -24,6 +24,14 @@ type User struct {
 	UpdateTime string `json:"update_time"`
 }
 
+type UserSearchCond struct {
+	Uid      int    `json:"uid"`
+	Mobile   string `json:"mobile"`
+	Email    string `json:"email"`
+	RealName string `json:"real_name"`
+	Status   int    `json:"status"`
+}
+
 func (user *UserModel) Add(mobile string, email string, real_name string, avatar string, password string, department string) (bool, int64) {
 	md5_password, _ := gmd5.EncryptString(password)
 	user_info := g.Map{"mobile": mobile, "email": email, "real_name": real_name, "avatar": avatar, "password": md5_password, "department": department}
@@ -84,7 +92,7 @@ func (user *UserModel) Delete(uid int) bool {
 }
 
 func (user *UserModel) CheckUserByMp(mobile string, password string) (gdb.Record, error) {
-	condition := g.Map{"mobile": mobile, "password": password}
+	condition := g.Map{"mobile": mobile, "password": password, "status": 1}
 	r, err := g.DB().Table("admin_user").Where(condition).One()
 	return r, err
 }
@@ -92,5 +100,37 @@ func (user *UserModel) CheckUserByMp(mobile string, password string) (gdb.Record
 func (user *UserModel) GetUserByUid(uid string) (gdb.Record, error) {
 	condition := g.Map{"id": uid}
 	r, err := g.DB().Table("admin_user").Where(condition).One()
+	return r, err
+}
+
+func (user *UserModel) GetUserList(condition UserSearchCond, limit int, offset int) (gdb.Result, int, error) {
+	cond := g.Map{}
+
+	if len(condition.Mobile) > 0 {
+		cond["mobile"] = condition.Mobile
+	}
+	if len(condition.Email) > 0 {
+		cond["mobile"] = condition.Email
+	}
+	if len(condition.RealName) > 0 {
+		cond["real_name"] = condition.RealName
+	}
+	if condition.Uid > 0 {
+		cond["id"] = condition.Uid
+	}
+	if condition.Status > 0 {
+		cond["status"] = condition.Status
+	}
+	query := g.DB().Table("admin_user").Where(cond).FieldsEx("password")
+	if limit > 0 {
+		query = query.Limit(offset, limit)
+	}
+	r, err := query.All()
+	n, _ := query.Count()
+	return r, n, err
+}
+
+func (user *UserModel) RoleUserList(roleid int) (gdb.Result, error) {
+	r, err := g.DB().Table("admin_user u").LeftJoin("admin_user_role_relation ur", "u.id=ur.uid").Fields("u.*").Where("ur.role_id", roleid).All()
 	return r, err
 }
