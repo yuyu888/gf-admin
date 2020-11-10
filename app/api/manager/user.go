@@ -71,6 +71,7 @@ func (c *UserController) Add() {
 			}
 		}
 		new(manager.RelationService).SetUserRole(gconv.Int(id), role_ids)
+
 		c.Resp.Status = 200
 		c.Resp.Message = "success"
 		c.Resp.Data = id

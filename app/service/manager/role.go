@@ -3,6 +3,7 @@ package manager
 import (
 	"gf-admin/app/model/manager"
 
+	"github.com/gogf/gf/database/gdb"
 	"github.com/gogf/gf/util/gconv"
 )
 
@@ -47,4 +48,8 @@ func (role *RoleService) Edit(roleid int, role_name string) bool {
 func (role *RoleService) RoleUserList(roleid int) (interface{}, error) {
 	res, err := new(manager.UserModel).RoleUserList(roleid)
 	return res, err
+}
+
+func (role *RoleService) OriginList() (gdb.Result, error) {
+	return new(manager.RoleModel).List()
 }

@@ -1,6 +1,10 @@
 package manager
 
-import "gf-admin/app/model/manager"
+import (
+	"gf-admin/app/model/manager"
+
+	"github.com/gogf/gf/util/gconv"
+)
 
 type RelationService struct {
 }
@@ -18,8 +22,26 @@ func (rs *RelationService) DeleteRoleUser(roleid int, uid int) bool {
 }
 
 func (rs *RelationService) SetUserRole(uid int, roleids []int) {
-	new(manager.RelationModel).DeleteRoleUserAll(uid)
+	new(manager.RelationModel).DeleteRoleUserExclude(uid, roleids)
 	for _, roleid := range roleids {
-		new(manager.RelationModel).AddRoleUser(roleid, uid)
+		new(manager.RelationModel).SaveRoleUser(gconv.Int(roleid), uid)
 	}
+}
+
+func (rs *RelationService) SetMenuRole(menu_id int, roleids []int) {
+	new(manager.RelationModel).DeleteRoleMenuExclude(menu_id, roleids)
+	for _, roleid := range roleids {
+		new(manager.RelationModel).SaveRoleMenu(gconv.Int(roleid), menu_id)
+	}
+}
+
+func (rs *RelationService) GetMenuRole(menu_id int) []int {
+	res, err := new(manager.RelationModel).MenuRole(menu_id)
+	var roleids []int
+	if err == nil {
+		for _, item := range res {
+			roleids = append(roleids, gconv.Int(item["role_id"]))
+		}
+	}
+	return roleids
 }

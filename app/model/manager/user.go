@@ -122,11 +122,11 @@ func (user *UserModel) GetUserList(condition UserSearchCond, limit int, offset i
 		cond["status"] = condition.Status
 	}
 	query := g.DB().Table("admin_user").Where(cond).FieldsEx("password")
+	n, _ := query.Count()
 	if limit > 0 {
 		query = query.Limit(offset, limit)
 	}
 	r, err := query.All()
-	n, _ := query.Count()
 	return r, n, err
 }
 

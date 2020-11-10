@@ -19,10 +19,11 @@ type Menu struct {
 	UpdateTime string `json:"update_time"`
 }
 
-func (menu *MenuModel) Add(menu_name string, menu_path string, menu_type int, fid int, sort_no int) (bool, int) {
-	_, err := g.DB().Table("admin_menu").Insert(g.Map{"menu_name": menu_name, "menu_path": menu_path, "menu_type": menu_type, "fid": fid, "sort_no": sort_no})
+func (menu *MenuModel) Add(menu_name string, menu_path string, menu_type int, fid int, sort_no int) (bool, int64) {
+	res, err := g.DB().Table("admin_menu").Insert(g.Map{"menu_name": menu_name, "menu_path": menu_path, "menu_type": menu_type, "fid": fid, "sort_no": sort_no})
 	if err == nil {
-		return true, 1
+		id, _ := res.LastInsertId()
+		return true, id
 	} else {
 		return false, 0
 	}
@@ -78,4 +79,14 @@ func (menu *MenuModel) Delete(menu_id int) bool {
 	} else {
 		return false
 	}
+}
+
+func (menu *MenuModel) GetMenuByFid(fid int, mType int) ([]Menu, error) {
+	menus := ([]Menu)(nil)
+	condition := g.Map{"fid": fid}
+	if mType > 0 {
+		condition["menu_type"] = mType
+	}
+	err := g.DB().Table("admin_menu").Where(condition).Order("sort_no").Structs(&menus)
+	return menus, err
 }
