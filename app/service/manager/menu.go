@@ -2,6 +2,7 @@ package manager
 
 import (
 	"gf-admin/app/model/manager"
+	"gf-admin/library/utils"
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/util/gconv"
@@ -13,8 +14,8 @@ type MenuService struct {
 type MenuTree struct {
 	manager.Menu
 	TypeShow string     `json:"type_show"`
-	HasChild int        `json:"has_child"`
-	HasAuth  int        `json:"has_auth"`
+	HasChild bool       `json:"has_child"`
+	HasAuth  bool       `json:"has_auth"`
 	Children []MenuTree `json:"children"`
 }
 
@@ -27,11 +28,11 @@ func (rs *MenuService) MenuTree(fid int, mtype int) []MenuTree {
 	if err == nil && len(menuList) > 0 {
 		for _, v := range menuList {
 			var children []MenuTree
-			mt := MenuTree{v, "", 0, 0, children}
+			mt := MenuTree{v, "", false, false, children}
 			mt.TypeShow = gconv.String(MenuTypeConfig[gconv.String(mt.MenuType)])
 			children = rs.MenuTree(v.Id, mtype)
 			if len(children) > 0 {
-				mt.HasChild = 1
+				mt.HasChild = true
 			}
 			mt.Children = children
 
@@ -53,4 +54,26 @@ func (menu *MenuService) HasChildren(menu_id int) bool {
 }
 func (menu *MenuService) Delete(menu_id int) bool {
 	return new(manager.MenuModel).Delete(menu_id)
+}
+
+func (rs *MenuService) AuthMenuTree(fid int, mtype int, auth_menu_ids []int) []MenuTree {
+	var dataList []MenuTree
+
+	menuList, err := new(manager.MenuModel).GetMenuByFid(fid, mtype)
+	if err == nil && len(menuList) > 0 {
+		for _, v := range menuList {
+			var children []MenuTree
+			mt := MenuTree{v, "", false, false, children}
+			mt.TypeShow = gconv.String(MenuTypeConfig[gconv.String(mt.MenuType)])
+			children = rs.AuthMenuTree(v.Id, mtype, auth_menu_ids)
+			if len(children) > 0 {
+				mt.HasChild = true
+			}
+			mt.HasAuth = utils.InArray(mt.Id, auth_menu_ids)
+			mt.Children = children
+
+			dataList = append(dataList, mt)
+		}
+	}
+	return dataList
 }

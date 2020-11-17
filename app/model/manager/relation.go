@@ -39,7 +39,7 @@ func (relation *RelationModel) AddRoleMenu(roleid int, menu_id int) bool {
 		return false
 	}
 	data := g.Map{"role_id": roleid, "menu_id": menu_id}
-	_, err := g.DB().Table("admin_role_menu_relation").Insert(data)
+	_, err := g.DB().Table("admin_role_menu_relation").Save(data)
 	if err == nil {
 		return true
 	} else {
@@ -112,5 +112,9 @@ func (relation *RelationModel) DeleteRoleMenuExclude(menu_id int, roleids []int)
 
 func (relation *RelationModel) MenuRole(menu_id int) (gdb.Result, error) {
 	res, err := g.DB().Table("admin_role_menu_relation").Where("menu_id", menu_id).All()
+	return res, err
+}
+func (relation *RelationModel) RoleMenu(role_id int) (gdb.Result, error) {
+	res, err := g.DB().Table("admin_role_menu_relation").Where("role_id", role_id).All()
 	return res, err
 }

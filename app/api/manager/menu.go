@@ -110,6 +110,17 @@ func (c *MenuController) MenuRole() {
 		c.Display(4001, "参数错误！", nil)
 	}
 	data := new(manager.RelationService).GetMenuRole(menu_id)
+	c.Display(200, "success", data)
+}
 
+func (c *MenuController) RoleList() {
+	role_id := c.Request.GetQueryInt("role_id", 0)
+	if role_id == 0 {
+		c.Display(4001, "参数错误！", nil)
+	}
+	menu_ids := new(manager.RelationService).GetRoleMenu(role_id)
+
+	menu_list := new(manager.MenuService).AuthMenuTree(1, 0, menu_ids)
+	data := g.Map{"menu_list": menu_list}
 	c.Display(200, "success", data)
 }

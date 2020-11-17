@@ -110,17 +110,18 @@ func (c *RoleController) MemberList() {
 }
 
 func (c *RoleController) AddRoleMenu() {
-	// roleid := c.Request.GetFormInt("roleid", 0)
-	// menu_id := c.Request.GetFormInt("menu_id", 0)
+	roleid := c.Request.GetFormInt("role_id", 0)
+	menu_id := c.Request.GetFormInt("menu_id", 0)
 
-	// if roleid == 0 || menu_id == 0 {
-	// 	c.Display(4001, "参数错误！", nil)
-	// }
-	// res := new(manager.RelationModel).AddRoleMenu(roleid, menu_id)
-	// if res == false {
-	// 	c.Display(5001, "添加失败", nil)
-	// }
-	// c.Display(200, "添加成功", nil)
+	if roleid == 0 || menu_id == 0 {
+		c.Display(4001, "参数错误！", nil)
+	}
+	res := new(manager.RelationService).AddRoleMenu(roleid, menu_id)
+
+	if res == false {
+		c.Display(5001, "添加失败", nil)
+	}
+	c.Display(200, "添加成功", nil)
 }
 func (c *RoleController) DeleteRoleMember() {
 	roleid := c.Request.GetFormInt("roleid", 0)
@@ -136,15 +137,15 @@ func (c *RoleController) DeleteRoleMember() {
 	c.Display(200, "删除成功", nil)
 }
 func (c *RoleController) DeleteRoleMenu() {
-	// roleid := c.Request.GetFormInt("roleid", 0)
-	// menu_id := c.Request.GetFormInt("menu_id", 0)
+	roleid := c.Request.GetFormInt("role_id", 0)
+	menu_id := c.Request.GetFormInt("menu_id", 0)
 
-	// if roleid == 0 || menu_id == 0 {
-	// 	c.Display(4001, "参数错误！", nil)
-	// }
-	// res := new(manager.RelationModel).DeleteRoleMenu(roleid, menu_id)
-	// if res == false {
-	// 	c.Display(5001, "删除失败", nil)
-	// }
-	// c.Display(200, "删除成功", nil)
+	if roleid == 0 || menu_id == 0 {
+		c.Display(4001, "参数错误！", nil)
+	}
+	res := new(manager.RelationService).DeleteRoleMenu(roleid, menu_id)
+	if res == false {
+		c.Display(5001, "删除失败", nil)
+	}
+	c.Display(200, "删除成功", nil)
 }
