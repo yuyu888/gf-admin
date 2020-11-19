@@ -39,7 +39,6 @@ func (c *BaseController) CheckLoginHigh() {
 }
 
 func (c *BaseController) GetLoginUser() map[string]interface{} {
-	c.CheckLogin()
 	userinfo := new(sso.SsoService).GetLoginUser(c.Request)
 	return userinfo
 }

@@ -56,7 +56,7 @@ func (menu *MenuService) Delete(menu_id int) bool {
 	return new(manager.MenuModel).Delete(menu_id)
 }
 
-func (rs *MenuService) AuthMenuTree(fid int, mtype int, auth_menu_ids []int) []MenuTree {
+func (menu *MenuService) AuthMenuTree(fid int, mtype int, auth_menu_ids []int) []MenuTree {
 	var dataList []MenuTree
 
 	menuList, err := new(manager.MenuModel).GetMenuByFid(fid, mtype)
@@ -65,7 +65,7 @@ func (rs *MenuService) AuthMenuTree(fid int, mtype int, auth_menu_ids []int) []M
 			var children []MenuTree
 			mt := MenuTree{v, "", false, false, children}
 			mt.TypeShow = gconv.String(MenuTypeConfig[gconv.String(mt.MenuType)])
-			children = rs.AuthMenuTree(v.Id, mtype, auth_menu_ids)
+			children = menu.AuthMenuTree(v.Id, mtype, auth_menu_ids)
 			if len(children) > 0 {
 				mt.HasChild = true
 			}
@@ -75,5 +75,20 @@ func (rs *MenuService) AuthMenuTree(fid int, mtype int, auth_menu_ids []int) []M
 			dataList = append(dataList, mt)
 		}
 	}
+	return dataList
+}
+
+func (menu *MenuService) UserMenuList(uid int) []MenuTree {
+	var dataList []MenuTree
+	auth_menu_ids := make([]int, 0)
+
+	user_menus, err := new(manager.RelationModel).UserMenus(uid)
+	if err == nil && len(user_menus) > 0 {
+		for _, v := range user_menus {
+			auth_menu_ids = append(auth_menu_ids, gconv.Int(v["menu_id"]))
+
+		}
+	}
+	dataList = menu.AuthMenuTree(1, 1, auth_menu_ids)
 	return dataList
 }

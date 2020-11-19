@@ -114,7 +114,13 @@ func (relation *RelationModel) MenuRole(menu_id int) (gdb.Result, error) {
 	res, err := g.DB().Table("admin_role_menu_relation").Where("menu_id", menu_id).All()
 	return res, err
 }
+
 func (relation *RelationModel) RoleMenu(role_id int) (gdb.Result, error) {
 	res, err := g.DB().Table("admin_role_menu_relation").Where("role_id", role_id).All()
+	return res, err
+}
+
+func (relation *RelationModel) UserMenus(uid int) (gdb.Result, error) {
+	res, err := g.DB().Table("admin_role_menu_relation m").LeftJoin("admin_user_role_relation u", "m.role_id=u.role_id").Fields("m.*").Where("u.uid", uid).All()
 	return res, err
 }

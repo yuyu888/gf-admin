@@ -37,7 +37,8 @@ func (rs *RelationService) SetMenuRole(menu_id int, roleids []int) {
 
 func (rs *RelationService) GetMenuRole(menu_id int) []int {
 	res, err := new(manager.RelationModel).MenuRole(menu_id)
-	var roleids []int
+	// var roleids []int
+	roleids := make([]int, 0)
 	if err == nil {
 		for _, item := range res {
 			roleids = append(roleids, gconv.Int(item["role_id"]))
@@ -48,7 +49,8 @@ func (rs *RelationService) GetMenuRole(menu_id int) []int {
 
 func (rs *RelationService) GetRoleMenu(role_id int) []int {
 	res, err := new(manager.RelationModel).RoleMenu(role_id)
-	var menuids []int
+	// var menuids []int
+	menuids := make([]int, 0)
 	if err == nil {
 		for _, item := range res {
 			menuids = append(menuids, gconv.Int(item["menu_id"]))
