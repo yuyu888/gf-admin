@@ -3,16 +3,27 @@ package router
 import (
 	"gf-admin/app/api/common"
 	"gf-admin/app/api/manager"
+	SM "gf-admin/app/service/manager"
 	"gf-admin/app/service/sso"
+	"strings"
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
+	"github.com/gogf/gf/util/gconv"
 )
 
 func MiddlewareAuth(r *ghttp.Request) {
 	isLogin := new(sso.SsoService).CheckLogin(r)
 	if isLogin == false {
 		resp := `{"status":4030,"message":"没有登录"}`
+		r.Response.WriteExit(resp)
+	}
+	loginUser := new(sso.SsoService).GetLoginUser(r)
+	menu_Auth_list := new(SM.MenuService).UserMenuPath(gconv.Int(loginUser["uid"]))
+	url_path := strings.Split(r.RequestURI, "?")
+	_, ok := menu_Auth_list[url_path[0]]
+	if ok == true && menu_Auth_list[url_path[0]] == false {
+		resp := `{"status":4031,"message":"没有权限"}`
 		r.Response.WriteExit(resp)
 	}
 	r.Middleware.Next()

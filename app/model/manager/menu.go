@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 
+	"github.com/gogf/gf/database/gdb"
 	"github.com/gogf/gf/frame/g"
 )
 
@@ -88,5 +89,15 @@ func (menu *MenuModel) GetMenuByFid(fid int, mType int) ([]Menu, error) {
 		condition["menu_type"] = mType
 	}
 	err := g.DB().Table("admin_menu").Where(condition).Order("sort_no").Structs(&menus)
+	return menus, err
+}
+
+func (menu *MenuModel) GetMenuByMenuids(menuids []int) (gdb.Result, error) {
+	menus, err := g.DB().Table("admin_menu").Where("id", menuids).All()
+	return menus, err
+}
+
+func (menu *MenuModel) GetALL() (gdb.Result, error) {
+	menus, err := g.DB().Table("admin_menu").All()
 	return menus, err
 }

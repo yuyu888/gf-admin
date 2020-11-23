@@ -92,3 +92,38 @@ func (menu *MenuService) UserMenuList(uid int) []MenuTree {
 	dataList = menu.AuthMenuTree(1, 1, auth_menu_ids)
 	return dataList
 }
+
+func (menu *MenuService) CheckUserMenu(uid int, menu_path string) bool {
+	auth_menu_ids := make([]int, 0)
+
+	user_menus, err := new(manager.RelationModel).UserMenus(uid)
+	if err == nil && len(user_menus) > 0 {
+		for _, v := range user_menus {
+			auth_menu_ids = append(auth_menu_ids, gconv.Int(v["menu_id"]))
+
+		}
+	}
+	return true
+}
+
+func (menu *MenuService) UserMenuPath(uid int) map[string]bool {
+	auth_menu_ids := make([]int, 0)
+
+	user_menus, err := new(manager.RelationModel).UserMenus(uid)
+	if err == nil && len(user_menus) > 0 {
+		for _, v := range user_menus {
+			auth_menu_ids = append(auth_menu_ids, gconv.Int(v["menu_id"]))
+
+		}
+	}
+	dataList, err := new(manager.MenuModel).GetALL()
+	paths := make(map[string]bool)
+	for _, v := range dataList {
+		if utils.InArray(gconv.Int(v["id"]), auth_menu_ids) == true {
+			paths[gconv.String(v["menu_path"])] = true
+		} else {
+			paths[gconv.String(v["menu_path"])] = false
+		}
+	}
+	return paths
+}
