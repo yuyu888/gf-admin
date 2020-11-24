@@ -12,6 +12,11 @@ type SysController struct {
 	api.BaseController
 }
 
+func NewSysController() *SysController {
+	obj := new(SysController)
+	return obj
+}
+
 func (c *SysController) Auth() {
 	c.CheckLoginHigh()
 	login_user := c.GetLoginUser()

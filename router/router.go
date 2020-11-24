@@ -40,6 +40,6 @@ func init() {
 		group.ALL("/manager/role", new(manager.RoleController), "Add, Edit, Delete, List, AddRoleMember, MemberList, DeleteRoleMember, AddRoleMenu, DeleteRoleMenu")
 	})
 	s.BindController("/api/common/sso", new(common.SsoController), "Login, Loginout")
-	s.BindController("/api/common/sys", new(common.SysController), "Auth")
+	s.BindController("/api/common/sys", common.NewSysController(), "Auth")
 
 }
