@@ -19,6 +19,6 @@ func (tj *TestJob) Run(id int, params string) {
 	json.Unmarshal([]byte(params), &data)
 	fmt.Println(data)
 
-	g.DB().Table("sys_future_job").Data(g.Map{"status": 2, "updated_time": gtime.Now().Format("Y-m-d H:i:s")}).Where("id", id).Update()
+	g.DB().Table("sys_future_job").Data(g.Map{"status": 2, "update_time": gtime.Now().Format("Y-m-d H:i:s")}).Where("id", id).Update()
 
 }

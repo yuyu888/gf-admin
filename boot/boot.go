@@ -15,6 +15,7 @@ var (
 
 // 用于应用初始化。
 func init() {
+	// new(tools.Controller).Test()
 	flag.Parse()
 	runMode := genv.Get("RUN_MODE", "dev")
 

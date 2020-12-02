@@ -19,6 +19,7 @@ func NewSysController() *SysController {
 
 func (c *SysController) Auth() {
 	c.CheckLoginHigh()
+
 	login_user := c.GetLoginUser()
 	menu_list := new(manager.MenuService).UserMenuList(gconv.Int(login_user["uid"]))
 	menu_auth_list := new(manager.MenuService).UserMenuPath(gconv.Int(login_user["uid"]))

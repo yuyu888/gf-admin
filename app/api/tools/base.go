@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"time"
 
-	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/frame/gmvc"
-	"github.com/gogf/gf/os/gtime"
+	"github.com/gogf/gf/net/ghttp"
+	"github.com/gogf/gf/os/glog"
 )
 
 type Controller struct {
@@ -70,11 +69,12 @@ func GetLocalIp() (string, error) {
 }
 
 func (c *Controller) Test() {
-	db := g.DB().Table("sys_future_job").Where("status", 1).Where("exec_time <=?", time.Now().Unix()).Limit(100)
-	list, _ := db.All()
-	fmt.Println(list)
-	ct := gtime.Now().Format("Y-m-d H:i:s")
-	fmt.Println(ct)
-
-	c.Response.WriteExit("this is a test!!!")
+	path := "/Users/yurong/Downloads/pics/11122.jpg"
+	r, e := ghttp.Post("http://www.star.com:82/v1/test/upload", "upfile=@file:"+path)
+	if e != nil {
+		glog.Error(e)
+	} else {
+		fmt.Println(string(r.ReadAll()))
+		r.Close()
+	}
 }

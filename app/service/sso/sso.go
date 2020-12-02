@@ -1,16 +1,28 @@
 package sso
 
 import (
+	"fmt"
 	"gf-admin/app/model/manager"
 	"net/http"
+	"time"
 
+	"github.com/gogf/gf/crypto/gaes"
 	"github.com/gogf/gf/crypto/gmd5"
+	"github.com/gogf/gf/encoding/gbase64"
+	"github.com/gogf/gf/encoding/gjson"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
 	"github.com/gogf/gf/util/gconv"
 )
 
 type SsoService struct {
+}
+
+type Authorization struct {
+	LoginTime int64  `json:"login_time"`
+	Signature string `json:"signature"`
+	Uid       int    `json:"uid"`
+	Expires   int    `json:"expires"`
 }
 
 func (s *SsoService) Login(mobile string, password string, HttpResp *ghttp.Response) (bool, string) {
@@ -20,24 +32,30 @@ func (s *SsoService) Login(mobile string, password string, HttpResp *ghttp.Respo
 			return false, "用户名或者密码错误"
 		} else {
 			resMap := gconv.Map(r)
-			uid := gconv.String(resMap["id"])
-			cookie_loginuid := &http.Cookie{
-				Name:     "login_uid",
-				Value:    uid,
-				MaxAge:   36000,
+			uid := gconv.Int(resMap["id"])
+			signature := buildSecretStr(gconv.String(uid), password)
+			authorization := &Authorization{
+				LoginTime: time.Now().Unix(),
+				Signature: signature,
+				Uid:       uid,
+				Expires:   s.expiresTime(),
+			}
+			str := gconv.String(authorization)
+			secret_key := s.secretKey()
+			fmt.Print(str)
+
+			_authorization, err := gaes.Encrypt(gconv.Bytes(str), gconv.Bytes(secret_key["key"]), gconv.Bytes(secret_key["iv"]))
+			if err != nil {
+				return false, "系统错误"
+			}
+			cookie_authorization := &http.Cookie{
+				Name:     "Authorization",
+				Value:    gbase64.EncodeToString(_authorization),
+				MaxAge:   s.expiresTime(),
 				Path:     "/",
 				HttpOnly: true,
 			}
-			http.SetCookie(HttpResp.Writer, cookie_loginuid)
-			secret_key := buildSecretStr(uid, password)
-			cookie_secretkey := &http.Cookie{
-				Name:     "secret_key",
-				Value:    secret_key,
-				MaxAge:   36000,
-				Path:     "/",
-				HttpOnly: true,
-			}
-			http.SetCookie(HttpResp.Writer, cookie_secretkey)
+			http.SetCookie(HttpResp.Writer, cookie_authorization)
 			return true, "登录成功"
 		}
 	} else {
@@ -46,24 +64,50 @@ func (s *SsoService) Login(mobile string, password string, HttpResp *ghttp.Respo
 }
 
 func (s *SsoService) CheckLogin(HttpReq *ghttp.Request) bool {
-	uid := HttpReq.Cookie.Get("login_uid")
-	secret_key := HttpReq.Cookie.Get("secret_key")
-	if len(uid) == 0 || len(secret_key) == 0 {
+	authorization_str := HttpReq.Cookie.Get("Authorization")
+	if len(authorization_str) == 0 {
 		return false
 	}
-	res := lowCheck(uid, secret_key)
+	authorization, err := gbase64.DecodeString(authorization_str)
+	if err != nil {
+		return false
+	}
+	secret_key := s.secretKey()
+	_authorization, err := gaes.Decrypt(gconv.Bytes(authorization), gconv.Bytes(secret_key["key"]), gconv.Bytes(secret_key["iv"]))
+	if err != nil {
+		return false
+	}
+	auth := gjson.New(gconv.String(_authorization))
+	if auth.Get("uid") == nil || auth.Get("signature") == nil {
+		return false
+	}
+	res := lowCheck(gconv.String(auth.Get("uid")), gconv.String(auth.Get("signature")))
 	return res
 }
 
 func (s *SsoService) Loginout(HttpReq *ghttp.Request) {
-	HttpReq.Cookie.Remove("login_uid")
-	HttpReq.Cookie.Remove("secret_key")
+	HttpReq.Cookie.Remove("Authorization")
 }
 
 func (s *SsoService) CheckLoginHigh(HttpReq *ghttp.Request) bool {
-	uid := HttpReq.Cookie.Get("login_uid")
-	secret_key := HttpReq.Cookie.Get("secret_key")
-	if len(uid) == 0 || len(secret_key) == 0 {
+	authorization_str := HttpReq.Cookie.Get("Authorization")
+	if len(authorization_str) == 0 {
+		return false
+	}
+	authorization, err := gbase64.DecodeString(authorization_str)
+	if err != nil {
+		return false
+	}
+	secret_key := s.secretKey()
+	_authorization, err := gaes.Decrypt(gconv.Bytes(authorization), gconv.Bytes(secret_key["key"]), gconv.Bytes(secret_key["iv"]))
+	if err != nil {
+		return false
+	}
+	auth := gjson.New(gconv.String(_authorization))
+	uid := gconv.String(auth.Get("uid"))
+	signature := gconv.String(auth.Get("signature"))
+
+	if len(uid) == 0 || len(signature) == 0 {
 		return false
 	}
 	r, err := new(manager.UserModel).GetUserByUid(uid)
@@ -72,12 +116,26 @@ func (s *SsoService) CheckLoginHigh(HttpReq *ghttp.Request) bool {
 	}
 	resMap := gconv.Map(r)
 	password := gconv.String(resMap["password"])
-	res := highCheck(uid, password, secret_key)
+	res := highCheck(uid, password, signature)
 	return res
 }
 
 func (s *SsoService) GetLoginUser(HttpReq *ghttp.Request) map[string]interface{} {
-	uid := HttpReq.Cookie.Get("login_uid")
+	authorization_str := HttpReq.Cookie.Get("Authorization")
+	if len(authorization_str) == 0 {
+		return g.Map{}
+	}
+	authorization, err := gbase64.DecodeString(authorization_str)
+	if err != nil {
+		return g.Map{}
+	}
+	secret_key := s.secretKey()
+	_authorization, err := gaes.Decrypt(gconv.Bytes(authorization), gconv.Bytes(secret_key["key"]), gconv.Bytes(secret_key["iv"]))
+	if err != nil {
+		return g.Map{}
+	}
+	auth := gjson.New(gconv.String(_authorization))
+	uid := gconv.String(auth.Get("uid"))
 	r, err := new(manager.UserModel).GetUserByUid(uid)
 	if err != nil || r == nil {
 		return g.Map{}
@@ -89,6 +147,17 @@ func (s *SsoService) GetLoginUser(HttpReq *ghttp.Request) map[string]interface{}
 	return user_info
 }
 
+func (s *SsoService) expiresTime() int {
+	return 3600
+}
+
+func (s *SsoService) secretKey() g.Map {
+	return g.Map{
+		"key": "c10157daa5b67bcd5bead831ba554e0c",
+		"iv":  "yuyu888/gf-admin",
+	}
+}
+
 func buildSecretStr(uid string, password string) string {
 	lowstr := cMd5(uid)
 	highstr := cMd5(uid + password)
@@ -96,8 +165,8 @@ func buildSecretStr(uid string, password string) string {
 }
 
 func cMd5(mystr string) string {
-	key := "c10157daa5b67bcd5bead831ba554e0c"
-	str, _ := gmd5.EncryptString(mystr + key)
+	secret_key := new(SsoService).secretKey()
+	str, _ := gmd5.EncryptString(mystr + gconv.String(secret_key["key"]))
 	return str
 }
 
